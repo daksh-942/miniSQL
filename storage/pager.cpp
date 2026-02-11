@@ -10,6 +10,8 @@ Pager::Pager(const std::string& fname): filename(fname)
         file.close();
         file.open(filename, std::ios::in | std::ios::out | std::ios::binary);
     }
+
+
     file.seekg(0,std::ios::end);
     std::streampos size=file.tellg();
     if (size%PAGE_SIZE!=0)
@@ -20,6 +22,8 @@ Pager::Pager(const std::string& fname): filename(fname)
     page_count=size/PAGE_SIZE;
 }
 
+
+
 void Pager::read_page(uint32_t page_id, char* buffer)
 {
     if (page_id>=page_count)
@@ -27,6 +31,7 @@ void Pager::read_page(uint32_t page_id, char* buffer)
         std::cerr<<"wrong page asked";
         exit(1);
     }
+    
     file.seekg(page_id*PAGE_SIZE,std::ios::beg);
     file.read(buffer,PAGE_SIZE);
     if (file.gcount()<PAGE_SIZE)
