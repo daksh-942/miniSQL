@@ -24,6 +24,19 @@ Pager::Pager(const std::string& fname): filename(fname)
 
 
 
+
+void Pager::write_page(uint32_t page_id, const char* buffer)
+{
+    if (page_id>=page_count)
+    {
+        std::cerr<<"wrong page asked";
+        exit(1);
+    }
+    file.seekp(page_id*PAGE_SIZE,std::ios::beg);
+    file.write(buffer,PAGE_SIZE);
+    file.flush();
+}
+
 void Pager::read_page(uint32_t page_id, char* buffer)
 {
     if (page_id>=page_count)
@@ -39,18 +52,6 @@ void Pager::read_page(uint32_t page_id, char* buffer)
         std::cerr<<"wrong formatting of the page";
         exit(1);
     }
-}
-
-void Pager::write_page(uint32_t page_id, const char* buffer)
-{
-    if (page_id>=page_count)
-    {
-        std::cerr<<"wrong page asked";
-        exit(1);
-    }
-    file.seekp(page_id*PAGE_SIZE,std::ios::beg);
-    file.write(buffer,PAGE_SIZE);
-    file.flush();
 }
 
 uint32_t Pager::allocate_page()

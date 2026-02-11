@@ -16,8 +16,8 @@ public:
     Pager(const std::string& fname);
     ~Pager();
 
-    void read_page(uint32_t page_id, char* buffer);
     void write_page(uint32_t page_id, const char* buffer);
+    void read_page(uint32_t page_id, char* buffer);
 
     uint32_t allocate_page();
     uint32_t get_page_count() const;
