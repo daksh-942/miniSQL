@@ -23,51 +23,117 @@
 
 /************************WE ARE TESTING SLOTTED PAGE HERE*********************************** */
 
-#include "storage/pager.h"
-#include "page/slotted_page.h"
+// #include "storage/pager.h"
+// #include "page/slotted_page.h"
+// #include <iostream>
+// #include <cstring>
+
+// int main() {
+
+//     Pager pager("test.db");
+
+//     uint32_t page_id;
+
+//     if (pager.get_page_count() == 0) {
+//         page_id = pager.allocate_page();
+
+//         char init_buffer[PAGE_SIZE];
+//         pager.read_page(page_id, init_buffer);
+
+//         Slotted_Page init_page(init_buffer);
+//         init_page.initialize();
+
+//         pager.write_page(page_id, init_buffer);
+//     }
+
+//     page_id = 0;
+
+//     char buffer[PAGE_SIZE];
+//     pager.read_page(page_id, buffer);
+
+//     Slotted_Page page(buffer);
+
+//     const char* msg1 = "Hello World";
+//     const char* msg2 = "Database Internals";
+
+//     int s1 = page.insert(msg1, strlen(msg1) + 1);
+//     int s2 = page.insert(msg2, strlen(msg2) + 1);
+
+//     pager.write_page(page_id, buffer);
+
+//     char out[100];
+
+//     page.read(s1, out);
+//     std::cout << "Slot 1: " << out << std::endl;
+
+//     page.read(s2, out);
+//     std::cout << "Slot 2: " << out << std::endl;
+
+//     return 0;
+// }
+/************************WE ARE TESTING B+TREE HERE*********************************** */
+#include "btree/btree.h"
 #include <iostream>
-#include <cstring>
+#include <vector>
+#include <algorithm>
+#include <random>
 
 int main() {
 
-    Pager pager("test.db");
+    BTree tree(4);   // small order to force many splits
 
-    uint32_t page_id;
+    // 🔥 Test 1: Insert shuffled numbers
+    std::vector<int> nums;
+    for (int i = 1; i <= 50; i++)
+        nums.push_back(i);
 
-    if (pager.get_page_count() == 0) {
-        page_id = pager.allocate_page();
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(nums.begin(), nums.end(), g);
 
-        char init_buffer[PAGE_SIZE];
-        pager.read_page(page_id, init_buffer);
+    std::cout << "Inserting values...\n";
 
-        Slotted_Page init_page(init_buffer);
-        init_page.initialize();
+    for (int x : nums)
+        tree.insert(x, {x, x});
 
-        pager.write_page(page_id, init_buffer);
+    std::cout << "\n=== TREE STRUCTURE ===\n";
+    tree.print_tree();
+
+    std::cout << "\n=== LEAF ORDER ===\n";
+    tree.print_leaves();
+
+    // 🔥 Test 2: Verify all keys exist
+    std::cout << "\n=== SEARCH TEST ===\n";
+    bool ok = true;
+
+    for (int i = 1; i <= 50; i++) {
+        auto res = tree.search(i);
+        if (!res) {
+            std::cout << "Missing key: " << i << "\n";
+            ok = false;
+        }
     }
 
-    page_id = 0;
+    if (ok)
+        std::cout << "All keys found successfully.\n";
 
-    char buffer[PAGE_SIZE];
-    pager.read_page(page_id, buffer);
+    // 🔥 Test 3: Check missing keys
+    std::cout << "\n=== NEGATIVE TEST ===\n";
+    for (int i = 100; i <= 105; i++) {
+        auto res = tree.search(i);
+        if (res)
+            std::cout << "Error: found nonexistent key " << i << "\n";
+    }
 
-    Slotted_Page page(buffer);
+    // 🔥 Test 4: Stress Insert More
+    std::cout << "\n=== EXTRA INSERTS ===\n";
+    for (int i = 51; i <= 80; i++)
+        tree.insert(i, {i, i});
 
-    const char* msg1 = "Hello World";
-    const char* msg2 = "Database Internals";
+    tree.print_tree();
+    tree.print_leaves();
 
-    int s1 = page.insert(msg1, strlen(msg1) + 1);
-    int s2 = page.insert(msg2, strlen(msg2) + 1);
-
-    pager.write_page(page_id, buffer);
-
-    char out[100];
-
-    page.read(s1, out);
-    std::cout << "Slot 1: " << out << std::endl;
-
-    page.read(s2, out);
-    std::cout << "Slot 2: " << out << std::endl;
+    std::cout << "\nDone.\n";
 
     return 0;
 }
