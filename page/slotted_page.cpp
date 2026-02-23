@@ -44,7 +44,7 @@ uint16_t Slotted_Page :: insert(const char* record ,uint16_t length){
     int right=temp.free_space_offset;
     if((right-left) < (length + sizeof(Slot))){
         std :: cerr<<"Space Not Available";
-        exit(1);
+        return -1;
     }
 
     int off=right-length;
