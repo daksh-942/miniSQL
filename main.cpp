@@ -72,68 +72,114 @@
 //     return 0;
 // }
 /************************WE ARE TESTING B+TREE HERE*********************************** */
-#include "btree/btree.h"
+// #include "btree/btree.h"
+// #include <iostream>
+// #include <vector>
+// #include <algorithm>
+// #include <random>
+
+// int main() {
+
+//     BTree tree(4);   // small order to force many splits
+
+//     // 🔥 Test 1: Insert shuffled numbers
+//     std::vector<int> nums;
+//     for (int i = 1; i <= 50; i++)
+//         nums.push_back(i);
+
+//     std::random_device rd;
+//     std::mt19937 g(rd());
+//     std::shuffle(nums.begin(), nums.end(), g);
+
+//     std::cout << "Inserting values...\n";
+
+//     for (int x : nums)
+//         tree.insert(x, {x, x});
+
+//     std::cout << "\n=== TREE STRUCTURE ===\n";
+//     tree.print_tree();
+
+//     std::cout << "\n=== LEAF ORDER ===\n";
+//     tree.print_leaves();
+
+//     // 🔥 Test 2: Verify all keys exist
+//     std::cout << "\n=== SEARCH TEST ===\n";
+//     bool ok = true;
+
+//     for (int i = 1; i <= 50; i++) {
+//         auto res = tree.search(i);
+//         if (!res) {
+//             std::cout << "Missing key: " << i << "\n";
+//             ok = false;
+//         }
+//     }
+
+//     if (ok)
+//         std::cout << "All keys found successfully.\n";
+
+//     // 🔥 Test 3: Check missing keys
+//     std::cout << "\n=== NEGATIVE TEST ===\n";
+//     for (int i = 100; i <= 105; i++) {
+//         auto res = tree.search(i);
+//         if (res)
+//             std::cout << "Error: found nonexistent key " << i << "\n";
+//     }
+
+//     // 🔥 Test 4: Stress Insert More
+//     std::cout << "\n=== EXTRA INSERTS ===\n";
+//     for (int i = 51; i <= 80; i++)
+//         tree.insert(i, {i, i});
+
+//     tree.print_tree();
+//     tree.print_leaves();
+
+//     std::cout << "\nDone.\n";
+
+//     return 0;
+// }
+
+
+
+/*************************************We are testing DiskBtree**************************************************************/
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <random>
+#include "storage/pager.h"
+#include "./btree/diskBtree.h"
 
 int main() {
 
-    BTree tree(4);   // small order to force many splits
+    // Open database file
+    Pager pager("test.db");
 
-    // 🔥 Test 1: Insert shuffled numbers
-    std::vector<int> nums;
-    for (int i = 1; i <= 50; i++)
-        nums.push_back(i);
+    // Create or load tree
+    DiskBtree tree(&pager);
 
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(nums.begin(), nums.end(), g);
+    std::cout << "Inserting keys...\n";
 
-    std::cout << "Inserting values...\n";
-
-    for (int x : nums)
-        tree.insert(x, {x, x});
-
-    std::cout << "\n=== TREE STRUCTURE ===\n";
-    tree.print_tree();
-
-    std::cout << "\n=== LEAF ORDER ===\n";
-    tree.print_leaves();
-
-    // 🔥 Test 2: Verify all keys exist
-    std::cout << "\n=== SEARCH TEST ===\n";
-    bool ok = true;
-
-    for (int i = 1; i <= 50; i++) {
-        auto res = tree.search(i);
-        if (!res) {
-            std::cout << "Missing key: " << i << "\n";
-            ok = false;
-        }
+    // Insert some keys
+    for (int i = 1; i <= 20; i++) {
+        tree.insert(i, {i * 10, (uint16_t)i});
     }
 
-    if (ok)
-        std::cout << "All keys found successfully.\n";
+    std::cout << "Insertion done.\n\n";
 
-    // 🔥 Test 3: Check missing keys
-    std::cout << "\n=== NEGATIVE TEST ===\n";
-    for (int i = 100; i <= 105; i++) {
-        auto res = tree.search(i);
-        if (res)
-            std::cout << "Error: found nonexistent key " << i << "\n";
+    // Search test
+    std::cout << "Searching keys...\n";
+
+    for (int i = 1; i <= 20; i++) {
+        auto result = tree.search(i);
+
+        std::cout << "Key " << i
+                  << " -> (" << result.first
+                  << ", " << result.second << ")\n";
     }
 
-    // 🔥 Test 4: Stress Insert More
-    std::cout << "\n=== EXTRA INSERTS ===\n";
-    for (int i = 51; i <= 80; i++)
-        tree.insert(i, {i, i});
+    // Search for missing key
+    int missing = 999;
+    auto res = tree.search(missing);
 
-    tree.print_tree();
-    tree.print_leaves();
-
-    std::cout << "\nDone.\n";
+    std::cout << "\nSearch missing key " << missing
+              << " -> (" << res.first
+              << ", " << res.second << ")\n";
 
     return 0;
 }
