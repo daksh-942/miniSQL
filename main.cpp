@@ -141,45 +141,98 @@
 
 
 /*************************************We are testing DiskBtree**************************************************************/
-#include <iostream>
+// #include <iostream>
+// #include "storage/pager.h"
+// #include "./btree/diskBtree.h"
+
+// int main() {
+
+//     // Open database file
+//     Pager pager("test.db");
+
+//     // Create or load tree
+//     DiskBtree tree(&pager);
+
+//     std::cout << "Inserting keys...\n";
+
+//     // Insert some keys
+//     for (int i = 1; i <= 20; i++) {
+//         tree.insert(i, {i * 10, (uint16_t)i});
+//     }
+
+//     std::cout << "Insertion done.\n\n";
+
+//     // Search test
+//     std::cout << "Searching keys...\n";
+
+//     for (int i = 1; i <= 20; i++) {
+//         auto result = tree.search(i);
+
+//         std::cout << "Key " << i
+//                   << " -> (" << result.first
+//                   << ", " << result.second << ")\n";
+//     }
+
+//     // Search for missing key
+//     int missing = 999;
+//     auto res = tree.search(missing);
+
+//     std::cout << "\nSearch missing key " << missing
+//               << " -> (" << res.first
+//               << ", " << res.second << ")\n";
+
+//     return 0;
+// }
+/*************************************We are testing Table Layer**************************************************************/
 #include "storage/pager.h"
-#include "./btree/diskBtree.h"
+#include "table/table.h"
+#include <iostream>
+#include <cstdio>
 
 int main() {
 
-    // Open database file
-    Pager pager("test.db");
+    // 🔥 Start fresh (delete old DB file)
+    std::remove("table.db");
 
-    // Create or load tree
-    DiskBtree tree(&pager);
+    std::cout << "=== INSERT TEST ===\n";
 
-    std::cout << "Inserting keys...\n";
+    {
+        Pager pager("table.db");
+        Table table(&pager);
 
-    // Insert some keys
-    for (int i = 1; i <= 20; i++) {
-        tree.insert(i, {i * 10, (uint16_t)i});
+        // Insert a few rows
+        Row r1 = {1, "Alice"};
+        Row r2 = {2, "Bob"};
+        Row r3 = {3, "Charlie"};
+
+        table.insert(r1);
+        table.insert(r2);
+        table.insert(r3);
+
+        std::cout << "Inserted 3 rows\n";
     }
 
-    std::cout << "Insertion done.\n\n";
+    // 🔁 Simulate program restart
+    std::cout << "\n=== READ TEST (after restart) ===\n";
 
-    // Search test
-    std::cout << "Searching keys...\n";
+    {
+        Pager pager("table.db");
+        Table table(&pager);
 
-    for (int i = 1; i <= 20; i++) {
-        auto result = tree.search(i);
+        for (int id = 1; id <= 3; id++) {
+            Row r;
 
-        std::cout << "Key " << i
-                  << " -> (" << result.first
-                  << ", " << result.second << ")\n";
+            if (table.get(id, r))
+                std::cout << r.key << " -> " << r.record << "\n";
+            else
+                std::cout << "Not found: " << id << "\n";
+        }
+
+        // Test missing key
+        Row r;
+        if (!table.get(99, r))
+            std::cout << "Key 99 not found (correct)\n";
     }
-
-    // Search for missing key
-    int missing = 999;
-    auto res = tree.search(missing);
-
-    std::cout << "\nSearch missing key " << missing
-              << " -> (" << res.first
-              << ", " << res.second << ")\n";
 
     return 0;
 }
