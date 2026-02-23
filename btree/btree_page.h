@@ -1,6 +1,6 @@
 #pragma once
-#include "../storage/pager.cpp"
-#include <cstint>
+#include "../storage/pager.h"
+#include <cstdint>
 #include <cstring>
 
 class BtreePage {
@@ -18,18 +18,20 @@ class BtreePage {
     bool is_leaf();
     void set_leaf(bool leaf);
 
+    uint16_t get_key_count();
+    void set_key_count(uint16_t count);
+    
     int* get_keys();
 
-    int* get_children();
+    uint32_t* get_children();
 
-    int get_next();
-    void set_next(int page_id);
+    uint32_t get_next();
+    void set_next(uint32_t page_id);
 
-    int parent();
-    void set_parent(int page_id);
+    uint32_t parent();
+    void set_parent(uint32_t page_id);
 
-    int get_key_count();
-    void set_key_count(int count);
+
     
     std :: pair<uint32_t,uint16_t> *values();
 
