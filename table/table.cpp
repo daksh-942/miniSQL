@@ -126,3 +126,29 @@ void Table :: scan(uint32_t key_start, uint32_t key_end){
         }
     }
 }
+
+bool Table :: remove(int key){
+    auto ptr=tree.search(key);
+    if (ptr.first==0) return false;
+
+    uint32_t p_id=ptr.first;
+    uint16_t s_id=ptr.second;
+
+    char BUFFER[PAGE_SIZE];
+    pager->read_page(p_id,BUFFER);
+
+    Slotted_Page sl(BUFFER);
+    sl.remove(s_id);
+    pager->write_page(p_id,BUFFER);
+
+    tree.remove(key);
+    return true;
+}
+
+bool Table :: update(const Row& row){
+    if (!remove(row.key)){
+        return false;
+    }
+    insert(row);
+    return true;
+}

@@ -26,4 +26,7 @@ class Table{
 
     void scan(uint32_t key_start, uint32_t key_end);
 
+    bool remove(int id);
+    bool update(const Row& row);
+
 };

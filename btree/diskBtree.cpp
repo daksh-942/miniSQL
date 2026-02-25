@@ -268,3 +268,52 @@ void DiskBtree :: insert_into_parent(uint32_t left_page_id,int key, uint32_t rig
     if (count+1>=BtreePage::ORDER)
         split_internal(parent_id);
 }
+
+bool DiskBtree :: remove(int key){
+    
+    uint32_t curr_id=root_page;
+    char BUFFER[PAGE_SIZE]={0};
+
+    while (true){
+
+        pager->read_page(curr_id,BUFFER);
+        BtreePage node(BUFFER);
+
+        if (node.is_leaf()){
+            break;
+        }
+
+        int i=node.get_key_count()-1;
+        int* keys=node.get_keys();
+
+        while (i>=0 && key<keys[i]){
+            i--;
+        }
+
+        curr_id=node.get_children()[i+1];
+    }
+
+    pager->read_page(curr_id,BUFFER);
+    BtreePage node(BUFFER);
+
+    int* keys=node.get_keys();
+    auto* vals=node.values();
+    int count=node.get_key_count();
+
+    int i=0;
+    while (i<count){
+        if (keys[i]==key){
+            while (i<count-1){
+                keys[i]=keys[i+1];
+                vals[i]=vals[i+1];
+                i++;
+            }
+        }
+        i++;
+    }
+
+    node.set_key_count(count-1);
+    pager->write_page(curr_id,BUFFER);
+
+    return true;
+}

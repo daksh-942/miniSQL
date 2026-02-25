@@ -237,7 +237,66 @@
 //     return 0;
 // }
 
-/*************************************We are testing Table Layer**************************************************************/
+/*************************************We are testing create and read**************************************************************/
+// #include "storage/pager.h"
+// #include "table/table.h"
+// #include <iostream>
+// #include <cstdio>
+
+// int main() {
+
+//     // 🔥 Start fresh
+//     std::remove("table.db");
+
+//     std::cout << "=== INSERT TEST ===\n";
+
+//     {
+//         Pager pager("table.db");
+//         Table table(&pager);
+
+//         // Insert enough rows to force multiple pages
+//         for (int i = 1; i <= 200; i++) {
+//             Row r;
+//             r.key = i;
+//             sprintf(r.record, "User_%d", i);
+//             table.insert(r);
+//         }
+
+//         std::cout << "Inserted 30 rows\n";
+//     }
+
+//     // 🔁 Restart simulation
+//     std::cout << "\n=== READ TEST (after restart) ===\n";
+
+//     {
+//         Pager pager("table.db");
+//         Table table(&pager);
+
+//         // Test single lookups
+//         Row r;
+
+//         if (table.get(5, r))
+//             std::cout << "Found: " << r.key << " -> " << r.record << "\n";
+
+//         if (table.get(65, r))
+//             std::cout << "Found: " << r.key << " -> " << r.record << "\n";
+
+//         // Test missing key
+//         if (!table.get(500, r))
+//             std::cout << "Key 500 not found (correct)\n";
+
+//         // Test range scan
+//         std::cout << "\n=== RANGE SCAN 10–15 ===\n";
+//         table.scan(1, 200);
+//     }
+
+//     std::cout << "\n=== TEST COMPLETE ===\n";
+
+//     return 0;
+// }
+
+/*************************************We are testing updation and deletion**************************************************************/
+
 #include "storage/pager.h"
 #include "table/table.h"
 #include <iostream>
@@ -245,52 +304,46 @@
 
 int main() {
 
-    // 🔥 Start fresh
     std::remove("table.db");
 
-    std::cout << "=== INSERT TEST ===\n";
-
     {
+        std::cout << "=== INSERT ===\n";
+
         Pager pager("table.db");
         Table table(&pager);
 
-        // Insert enough rows to force multiple pages
-        for (int i = 1; i <= 200; i++) {
+        for (int i = 1; i <= 500; i++) {
             Row r;
             r.key = i;
             sprintf(r.record, "User_%d", i);
             table.insert(r);
         }
-
-        std::cout << "Inserted 30 rows\n";
     }
 
-    // 🔁 Restart simulation
-    std::cout << "\n=== READ TEST (after restart) ===\n";
+    std::cout << "\n=== DELETE & UPDATE ===\n";
 
     {
         Pager pager("table.db");
         Table table(&pager);
 
-        // Test single lookups
+        table.remove(3);   // lazy delete
+        for (int i=100;i<200;i++)
+            table.remove(i);
+        table.remove(3);
         Row r;
+        r.key = 2;
+        sprintf(r.record, "Updated_User_2");
+        table.update(r);
 
-        if (table.get(5, r))
-            std::cout << "Found: " << r.key << " -> " << r.record << "\n";
+        for (int i = 1; i <= 500; i++) {
+            Row out;
 
-        if (table.get(65, r))
-            std::cout << "Found: " << r.key << " -> " << r.record << "\n";
-
-        // Test missing key
-        if (!table.get(500, r))
-            std::cout << "Key 500 not found (correct)\n";
-
-        // Test range scan
-        std::cout << "\n=== RANGE SCAN 10–15 ===\n";
-        table.scan(1, 200);
+            if (table.get(i, out))
+                std::cout << out.key << " -> " << out.record << "\n";
+            else
+                std::cout << i << " -> (missing)\n";
+        }
     }
-
-    std::cout << "\n=== TEST COMPLETE ===\n";
 
     return 0;
 }

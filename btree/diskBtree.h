@@ -20,4 +20,6 @@ class DiskBtree{
         void insert(uint32_t key, std ::pair<uint32_t, uint16_t> value);
 
         std ::pair<uint32_t, uint16_t> search(int key);
+
+        bool remove(int key);
 };
