@@ -184,6 +184,60 @@
 //     return 0;
 // }
 /*************************************We are testing Table Layer**************************************************************/
+// #include "storage/pager.h"
+// #include "table/table.h"
+// #include <iostream>
+// #include <cstdio>
+
+// int main() {
+
+//     // 🔥 Start fresh (delete old DB file)
+//     std::remove("table.db");
+
+//     std::cout << "=== INSERT TEST ===\n";
+
+//     {
+//         Pager pager("table.db");
+//         Table table(&pager);
+
+//         // Insert a few rows
+//         Row r1 = {1, "Alice"};
+//         Row r2 = {2, "Bob"};
+//         Row r3 = {3, "Charlie"};
+
+//         table.insert(r1);
+//         table.insert(r2);
+//         table.insert(r3);
+
+//         std::cout << "Inserted 3 rows\n";
+//     }
+
+//     // 🔁 Simulate program restart
+//     std::cout << "\n=== READ TEST (after restart) ===\n";
+
+//     {
+//         Pager pager("table.db");
+//         Table table(&pager);
+
+//         for (int id = 1; id <= 3; id++) {
+//             Row r;
+
+//             if (table.get(id, r))
+//                 std::cout << r.key << " -> " << r.record << "\n";
+//             else
+//                 std::cout << "Not found: " << id << "\n";
+//         }
+
+//         // Test missing key
+//         Row r;
+//         if (!table.get(99, r))
+//             std::cout << "Key 99 not found (correct)\n";
+//     }
+
+//     return 0;
+// }
+
+/*************************************We are testing Table Layer**************************************************************/
 #include "storage/pager.h"
 #include "table/table.h"
 #include <iostream>
@@ -191,7 +245,7 @@
 
 int main() {
 
-    // 🔥 Start fresh (delete old DB file)
+    // 🔥 Start fresh
     std::remove("table.db");
 
     std::cout << "=== INSERT TEST ===\n";
@@ -200,39 +254,43 @@ int main() {
         Pager pager("table.db");
         Table table(&pager);
 
-        // Insert a few rows
-        Row r1 = {1, "Alice"};
-        Row r2 = {2, "Bob"};
-        Row r3 = {3, "Charlie"};
+        // Insert enough rows to force multiple pages
+        for (int i = 1; i <= 200; i++) {
+            Row r;
+            r.key = i;
+            sprintf(r.record, "User_%d", i);
+            table.insert(r);
+        }
 
-        table.insert(r1);
-        table.insert(r2);
-        table.insert(r3);
-
-        std::cout << "Inserted 3 rows\n";
+        std::cout << "Inserted 30 rows\n";
     }
 
-    // 🔁 Simulate program restart
+    // 🔁 Restart simulation
     std::cout << "\n=== READ TEST (after restart) ===\n";
 
     {
         Pager pager("table.db");
         Table table(&pager);
 
-        for (int id = 1; id <= 3; id++) {
-            Row r;
+        // Test single lookups
+        Row r;
 
-            if (table.get(id, r))
-                std::cout << r.key << " -> " << r.record << "\n";
-            else
-                std::cout << "Not found: " << id << "\n";
-        }
+        if (table.get(5, r))
+            std::cout << "Found: " << r.key << " -> " << r.record << "\n";
+
+        if (table.get(65, r))
+            std::cout << "Found: " << r.key << " -> " << r.record << "\n";
 
         // Test missing key
-        Row r;
-        if (!table.get(99, r))
-            std::cout << "Key 99 not found (correct)\n";
+        if (!table.get(500, r))
+            std::cout << "Key 500 not found (correct)\n";
+
+        // Test range scan
+        std::cout << "\n=== RANGE SCAN 10–15 ===\n";
+        table.scan(1, 200);
     }
+
+    std::cout << "\n=== TEST COMPLETE ===\n";
 
     return 0;
 }
