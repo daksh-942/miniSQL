@@ -37,13 +37,13 @@ void Slotted_Page :: initialize(){
 
 
 
-uint16_t Slotted_Page :: insert(const char* record ,uint16_t length){
+int Slotted_Page :: insert(const char* record ,uint16_t length){
     PageHeader temp=get_header();
     int count=temp.slot_count;
     int left=sizeof(PageHeader) + count*sizeof(Slot);
     int right=temp.free_space_offset;
     if((right-left) < (length + sizeof(Slot))){
-        std :: cerr<<"Space Not Available";
+        //std :: cerr<<"Space Not Available";
         return -1;
     }
 

@@ -34,7 +34,7 @@ class Slotted_Page{
 
     void initialize();
 
-    uint16_t insert(const char* record ,uint16_t length);
+    int insert(const char* record ,uint16_t length);
     void read(uint16_t slot_id,char* out_buffer);
     void remove(uint16_t slot_id);
 };
