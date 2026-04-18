@@ -297,52 +297,95 @@
 
 /*************************************We are testing updation and deletion**************************************************************/
 
-#include "storage/pager.h"
-#include "table/table.h"
+// #include "storage/pager.h"
+// #include "table/table.h"
+// #include <iostream>
+// #include <cstdio>
+
+// int main() {
+
+//     std::remove("table.db");
+
+//     {
+//         std::cout << "=== INSERT ===\n";
+
+//         Pager pager("table.db");
+//         Table table(&pager);
+
+//         for (int i = 1; i <= 500; i++) {
+//             Row r;
+//             r.key = i;
+//             sprintf(r.record, "User_%d", i);
+//             table.insert(r);
+//         }
+//     }
+
+//     std::cout << "\n=== DELETE & UPDATE ===\n";
+
+//     {
+//         Pager pager("table.db");
+//         Table table(&pager);
+
+//         table.remove(3);   // lazy delete
+//         for (int i=100;i<200;i++)
+//             table.remove(i);
+//         table.remove(3);
+//         Row r;
+//         r.key = 2;
+//         sprintf(r.record, "Updated_User_2");
+//         table.update(r);
+
+//         for (int i = 1; i <= 500; i++) {
+//             Row out;
+
+//             if (table.get(i, out))
+//                 std::cout << out.key << " -> " << out.record << "\n";
+//             else
+//                 std::cout << i << " -> (missing)\n";
+//         }
+//     }
+
+//     return 0;
+// }
+
+
+// #include "cli/cli.h"
+// #include <iostream>
+
+// int main() {
+
+//     std::cout << "MiniDB CLI\n";
+
+//     CLI cli("app.db");
+
+//     cli.print_help();   // show commands once
+//     cli.run();          // run loop
+
+//     return 0;
+// }
+
+
+
+#include "cli/cli.h"
 #include <iostream>
-#include <cstdio>
+#include <limits>
 
 int main() {
+    std::cout << "MiniDB CLI\n";
 
-    std::remove("table.db");
+    while (true) {
+        std::string table_name;
+        std::cout << "Enter table name (or 'exit'): ";
+        std::cin >> table_name;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    {
-        std::cout << "=== INSERT ===\n";
+        if (table_name == "exit") break;
 
-        Pager pager("table.db");
-        Table table(&pager);
+        std::string db_file = table_name + ".db";
 
-        for (int i = 1; i <= 500; i++) {
-            Row r;
-            r.key = i;
-            sprintf(r.record, "User_%d", i);
-            table.insert(r);
-        }
-    }
-
-    std::cout << "\n=== DELETE & UPDATE ===\n";
-
-    {
-        Pager pager("table.db");
-        Table table(&pager);
-
-        table.remove(3);   // lazy delete
-        for (int i=100;i<200;i++)
-            table.remove(i);
-        table.remove(3);
-        Row r;
-        r.key = 2;
-        sprintf(r.record, "Updated_User_2");
-        table.update(r);
-
-        for (int i = 1; i <= 500; i++) {
-            Row out;
-
-            if (table.get(i, out))
-                std::cout << out.key << " -> " << out.record << "\n";
-            else
-                std::cout << i << " -> (missing)\n";
-        }
+        CLI cli(db_file);   // ✅ each table = separate DB
+        cli.print_help();
+        cli.run();
     }
 
     return 0;
