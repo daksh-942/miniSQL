@@ -100,6 +100,3 @@ void Slotted_Page :: remove(uint16_t slot_id){
       sl.is_deleted=1;
       set_slot(slot_id,sl);
 }
-
-
-

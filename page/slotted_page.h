@@ -21,19 +21,19 @@ class Slotted_Page{
     private:
     char* data;
 
-    void set_header(const PageHeader& header);
-    PageHeader get_header();
-
-    void set_slot(uint16_t slot_id, Slot& slot);
-    Slot get_slot(const uint16_t slot_id);
-
-
     public:
 
     Slotted_Page(char *page_data);
 
     void initialize();
 
+
+    void set_header(const PageHeader& header);
+    PageHeader get_header();
+
+    void set_slot(uint16_t slot_id, Slot& slot);
+    Slot get_slot(const uint16_t slot_id);
+    
     int insert(const char* record ,uint16_t length);
     void read(uint16_t slot_id,char* out_buffer);
     void remove(uint16_t slot_id);
