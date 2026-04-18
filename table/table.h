@@ -29,4 +29,8 @@ class Table{
     bool remove(int id);
     bool update(const Row& row);
 
+    void print_all();
+    int count_rows();
+    
+    void clear();
 };

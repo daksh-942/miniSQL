@@ -1,5 +1,6 @@
 #include "table.h"
 #include <iostream>
+#include <iomanip>
 
 void Table :: load_metadata(){
     char BUFFER[PAGE_SIZE]={0};
@@ -35,7 +36,7 @@ void Table :: save_metadata(){
 Table :: Table(Pager* pager):pager(pager),tree(pager){
 
     if(pager->get_page_count()<3){
-
+        //new file created
         uint32_t page_id = pager->allocate_page();
         char BUFFER[PAGE_SIZE]={0};
         Slotted_Page sl_page(BUFFER);
@@ -151,4 +152,94 @@ bool Table :: update(const Row& row){
     }
     insert(row);
     return true;
+}
+
+void Table::print_all() {
+
+    // Header
+    std::cout << "+----+--------------------------------+\n";
+    std::cout << "| ID | NAME                           |\n";
+    std::cout << "+----+--------------------------------+\n";
+
+    char buffer[PAGE_SIZE];
+
+    for (uint32_t pid : data_pages) {
+
+        pager->read_page(pid, buffer);
+        Slotted_Page page(buffer);
+
+        PageHeader header = page.get_header();
+
+        for (uint16_t i = 0; i < header.slot_count; i++) {
+
+            Slot slot = page.get_slot(i);
+
+            if (slot.is_deleted)
+                continue;
+
+            Row row;
+            page.read(i, (char*)&row);
+
+            // formatted row print
+            std::cout << "| "
+                      << std::setw(2) << row.key << " | "
+                      << std::setw(30) << std::left << row.record
+                      << "|\n";
+        }
+    }
+
+    std::cout << "+----+--------------------------------+\n";
+}
+
+int Table::count_rows() {
+
+    int total = 0;
+    char buffer[PAGE_SIZE];
+
+    for (uint32_t pid : data_pages) {
+
+        pager->read_page(pid, buffer);
+        Slotted_Page page(buffer);
+
+        PageHeader header = page.get_header();
+
+        for (uint16_t i = 0; i < header.slot_count; i++) {
+
+            Slot slot = page.get_slot(i);
+
+            if (slot.is_deleted)
+                continue;
+
+            total++;
+        }
+    }
+
+    return total;
+}
+
+void Table::clear() {
+
+    char buffer[PAGE_SIZE];
+
+    for (uint32_t pid : data_pages) {
+
+        pager->read_page(pid, buffer);
+        Slotted_Page page(buffer);
+
+        PageHeader header = page.get_header();
+
+        for (uint16_t i = 0; i < header.slot_count; i++) {
+
+            Slot slot = page.get_slot(i);
+
+            if (slot.is_deleted)
+                continue;
+
+            Row row;
+            page.read(i, (char*)&row);
+            
+            remove (row.key);
+        }
+    }
+    save_metadata();
 }
