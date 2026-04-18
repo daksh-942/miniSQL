@@ -3,7 +3,8 @@
 #include <cstdint>
 #include <cstring>
 
-class BtreePage {
+class BtreePage //this class itself is a node , whiile calling any of it function we need not to sent curr node anytime
+{
     private : 
     char* data;
 
@@ -30,10 +31,5 @@ class BtreePage {
 
     uint32_t parent();
     void set_parent(uint32_t page_id);
-
-
-    
     std :: pair<uint32_t,uint16_t> *values();
-
-
 };

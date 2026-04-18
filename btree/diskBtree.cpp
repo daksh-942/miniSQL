@@ -3,7 +3,7 @@
 DiskBtree :: DiskBtree(Pager* pager){
     this->pager=pager;
     
-    if(pager->get_page_count()==0){
+    if (pager->get_page_count()==0){
 
         root_page=pager->allocate_page();
 
@@ -167,7 +167,7 @@ void DiskBtree :: split_internal(uint32_t page_id){
     pager->read_page(page_id,left);
     BtreePage left_page(left);
     int* l_keys=left_page.get_keys();
-    auto* l_child=left_page.get_children();
+    auto* l_child=left_page.get_children();  
 
     char right[PAGE_SIZE]={0};
     uint32_t right_id= pager->allocate_page();
@@ -218,6 +218,7 @@ void DiskBtree :: insert_into_parent(uint32_t left_page_id,int key, uint32_t rig
     BtreePage right_page(right);
     
     if (parent_id==0){
+        //when we are splliting for the first time.
         uint32_t new_root_id=pager->allocate_page();
 
         char new_root[PAGE_SIZE]={0};
