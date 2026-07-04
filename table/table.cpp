@@ -53,6 +53,8 @@ Table :: Table(Pager* pager):pager(pager),tree(pager){
         load_metadata();
     }
 }
+
+
 void Table :: insert(const Row& row){
 
     char BUFFER[PAGE_SIZE]={0};
