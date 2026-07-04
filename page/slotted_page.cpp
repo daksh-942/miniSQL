@@ -16,6 +16,7 @@ PageHeader Slotted_Page :: get_header(){
     return header;
 }
 
+
 void Slotted_Page :: set_slot(uint16_t slot_id, Slot& slot){
     memcpy(data+sizeof(PageHeader)+slot_id*sizeof(Slot),&slot,sizeof(Slot));
 }
@@ -25,6 +26,7 @@ Slot Slotted_Page :: get_slot(const uint16_t slot_id){
     memcpy(&temp,data+sizeof(PageHeader)+slot_id*sizeof(Slot),sizeof(Slot));
     return temp;
 }
+
 
 
 void Slotted_Page :: initialize(){
@@ -46,6 +48,8 @@ int Slotted_Page :: insert(const char* record ,uint16_t length){
         //std :: cerr<<"Space Not Available";
         return -1;
     }
+
+
 
     int off=right-length;
     memcpy(data+off,record,length);
@@ -72,6 +76,8 @@ void Slotted_Page :: read(uint16_t slot_id,char* out_buffer){
         std :: cerr<<"Accessing out of bound";
         exit(1);
       }
+
+      
 
       Slot sl=get_slot(slot_id);
       if(sl.is_deleted){

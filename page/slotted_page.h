@@ -7,7 +7,7 @@ struct PageHeader {
     uint16_t slot_count;
 };
 
-#pragma pack(push,1)
+#pragma pack(push,1) //here compiler will not add any padding between the members of the struct. This is important for ensuring that the struct has a consistent size and layout in memory, which is necessary for reading and writing data to disk or across networks.
 
 struct Slot{
     uint8_t is_deleted;
@@ -19,7 +19,7 @@ struct Slot{
 
 class Slotted_Page{
     private:
-    char* data;
+    char* data;  // Pointer to the raw page data 4kb
 
     public:
 
@@ -27,6 +27,7 @@ class Slotted_Page{
 
     void initialize();
 
+    
 
     void set_header(const PageHeader& header);
     PageHeader get_header();
