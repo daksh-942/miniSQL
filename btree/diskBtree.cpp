@@ -5,7 +5,7 @@ DiskBtree :: DiskBtree(Pager* pager){
     
     if (pager->get_page_count()==0){
 
-        root_page=pager->allocate_page();
+        root_page=pager->allocate_page();  //0 id 
 
         char BUFFER[PAGE_SIZE]={0};
         BtreePage page(BUFFER);
@@ -17,7 +17,7 @@ DiskBtree :: DiskBtree(Pager* pager){
 
         pager->write_page(root_page,BUFFER);
         
-        uint32_t METABUFF=pager->allocate_page();
+        uint32_t METABUFF=pager->allocate_page();  //page id 1 is reserved for metadata
         char METADATA[PAGE_SIZE]={0};
         memcpy(METADATA,&root_page,4);
         pager->write_page(METABUFF,METADATA);
@@ -28,6 +28,8 @@ DiskBtree :: DiskBtree(Pager* pager){
         memcpy(&root_page,METADATA,4);
     }
 }
+
+
 std :: pair<uint32_t,uint16_t> DiskBtree :: search(int key){
     uint32_t current = root_page;
 
@@ -60,6 +62,7 @@ std :: pair<uint32_t,uint16_t> DiskBtree :: search(int key){
     }
 }
 
+
 void DiskBtree :: insert(uint32_t key, std ::pair<uint32_t, uint16_t> value){
     insert_recursive(key,value,root_page);
 }
@@ -69,6 +72,8 @@ void DiskBtree :: insert_recursive(int key, std ::pair<uint32_t, uint16_t> value
     char BUFFER[PAGE_SIZE];
     pager->read_page(page_id,BUFFER);
     BtreePage page(BUFFER);
+
+    // "Every B+ tree node is stored as a page on disk. Whenever I need to access a node, I use the Pager to load that page into a buffer. I then wrap the buffer with a BtreePage object so I can manipulate it using high-level methods instead of raw bytes. Once the operation is complete, I write the modified buffer back to disk if any changes were made. This separation of storage (Pager) and page logic (BtreePage) makes the design clean and efficient."
 
     uint16_t count = page.get_key_count();
     int* keys=page.get_keys();
@@ -137,6 +142,7 @@ void DiskBtree ::  split_leaf(uint32_t page_id,int key,std::pair<uint32_t,uint16
     temp_key[i+1]=key;
     temp_val[i+1]=value;
 
+
     uint16_t mid=left_page.ORDER/2;
 
     left_page.set_key_count(mid);
@@ -186,7 +192,10 @@ void DiskBtree :: split_internal(uint32_t page_id){
         r_keys[i-mid-1]=l_keys[i];
     }
 
+
+
     for(int i=mid+1;i<=l_count;i++){
+        //here we are setting the parent of the child nodes of the right node to the right node itself
         r_child[i-mid-1]=l_child[i];
         char cbuf[PAGE_SIZE];
         pager->read_page(l_child[i], cbuf);
@@ -201,7 +210,7 @@ void DiskBtree :: split_internal(uint32_t page_id){
     left_page.set_key_count(mid);
 
     pager->write_page(right_id,right);
-    pager->write_page(page_id,left);
+    pager->write_page(page_id,left);  //persist the changes made to the left page after splitting
 
     insert_into_parent(page_id,promote_key,right_id);
 }
@@ -217,13 +226,15 @@ void DiskBtree :: insert_into_parent(uint32_t left_page_id,int key, uint32_t rig
     pager->read_page(right_page_id,right);
     BtreePage right_page(right);
     
-    if (parent_id==0){
-        //when we are splliting for the first time.
+    if (parent_id==0){ //why parent
+        
+        //when we are splliting the root node we need to create a new root node and set the left and right child of the new root node to the left and right child of the old root node respectively
         uint32_t new_root_id=pager->allocate_page();
 
         char new_root[PAGE_SIZE]={0};
         BtreePage new_root_page(new_root);
         new_root_page.set_key_count(1);
+        new_root_page.set_parent(0);
         new_root_page.set_leaf(false);
 
         new_root_page.get_keys()[0]=key;

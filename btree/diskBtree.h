@@ -21,5 +21,6 @@ class DiskBtree{
 
         std ::pair<uint32_t, uint16_t> search(int key);
 
-        bool remove(int key);
+        bool remove(int key);  //we are using tombstone deletion so we will not be merging the nodes and we will not be rebalancing the tree after deletion
+                                //also called lazy deletion as we are not rebalancing the tree after deletion and we are not merging the nodes after deletion
 };

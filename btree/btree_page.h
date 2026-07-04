@@ -3,6 +3,36 @@
 #include <cstdint>
 #include <cstring>
 
+// Byte Offset
+
+// 0        is_leaf (1 byte)
+
+// 1-2      key_count (2 bytes)
+
+// 3-6      parent_page (4 bytes)
+
+// 7-10     next_leaf_page (4 bytes)
+
+// ---------------------------------
+
+// 11...    keys[]
+
+// ---------------------------------
+
+//         children[] (internal node)
+//         OR
+//         values[]   (leaf node)
+
+// +--------------------------------------------------+
+// | Header (11 bytes)                                |
+// +--------------------------------------------------+
+// | Keys                                              |
+// +--------------------------------------------------+
+// | Children OR Values                                |
+// +--------------------------------------------------+
+
+
+
 class BtreePage //this class itself is a node , whiile calling any of it function we need not to sent curr node anytime
 {
     private : 
