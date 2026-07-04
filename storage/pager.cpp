@@ -3,17 +3,21 @@
 
 Pager::Pager(const std::string& fname): filename(fname)
 {
+    //
     file.open(filename, std::ios::in | std::ios::out | std::ios::binary);
+    // If the file does not exist, create it and reopen in read/write mode
     if (!file.is_open())
     {
+        // File does not exist, create it only in write mode to avoid truncating existing files
         file.open(filename,std::ios::out | std::ios:: binary);
-        file.close();
+        file.close(); // Close the file after creating it
+        // Reopen the file in read/write mode
         file.open(filename, std::ios::in | std::ios::out | std::ios::binary);
     }
 
 
-    file.seekg(0,std::ios::end);
-    std::streampos size=file.tellg();
+    file.seekg(0,std::ios::end); // Move the read pointer to the end of the file
+    std::streampos size=file.tellg();  // Get the size of the file
     if (size%PAGE_SIZE!=0)
     {
         std::cerr<<"file corrupted";
@@ -32,6 +36,7 @@ void Pager::write_page(uint32_t page_id, const char* buffer)
         std::cerr<<"wrong page asked";
         exit(1);
     }
+
     file.seekp(page_id*PAGE_SIZE,std::ios::beg);
     file.write(buffer,PAGE_SIZE);
     file.flush();
@@ -47,6 +52,7 @@ void Pager::read_page(uint32_t page_id, char* buffer)
     
     file.seekg(page_id*PAGE_SIZE,std::ios::beg);
     file.read(buffer,PAGE_SIZE);
+    
     if (file.gcount()<PAGE_SIZE)
     {
         std::cerr<<"wrong formatting of the page";
@@ -58,7 +64,7 @@ uint32_t Pager::allocate_page()
 {
     file.seekp(0,std::ios::end);
     const char buffer[PAGE_SIZE]={0};
-    file.write(buffer,PAGE_SIZE);
+    file.write(buffer,PAGE_SIZE);  //append a new page at the end of the file
     page_count++;
     file.flush();
     return page_count-1;
